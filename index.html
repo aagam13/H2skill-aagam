@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="CultureRoam — AI-powered platform to discover destinations, uncover hidden gems, explore local food scenes, heritage sites, and immersive cultural experiences across India." />
+  <meta name="keywords" content="travel, India, Indore, cultural tourism, AI travel guide, heritage, food, waterfalls, GenAI" />
+  <meta property="og:title" content="CultureRoam — Discover India with AI" />
+  <meta property="og:description" content="Generative AI-powered travel discovery platform for authentic cultural experiences across India." />
+  <title>CultureRoam — Discover India with AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ========== NAV ========== -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="#hero" class="nav-logo" aria-label="CultureRoam Home">
+        <span class="logo-icon" aria-hidden="true">🌏</span>
+        <span class="logo-text">CultureRoam</span>
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="#explore" class="nav-link">Explore</a></li>
+        <li><a href="#food-culture" class="nav-link">Food</a></li>
+        <li><a href="#nature" class="nav-link">Nature</a></li>
+        <li><a href="#heritage" class="nav-link">Heritage</a></li>
+        <li><a href="#ai-guide" class="nav-link">AI Guide</a></li>
+      </ul>
+      <div class="ai-status-badge" id="aiStatusBadge" aria-label="AI Status">
+        <span class="badge-dot" aria-hidden="true"></span>
+        <span id="aiBadgeText">CultureRoam AI</span>
+      </div>
+      <button class="groq-opt-btn" id="openGroqPanel" aria-label="Optional: Add Groq API key for Llama 3.3" title="Optional: Add Groq key for Llama 3.3 fallback">⚡ Groq</button>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mobileMenu" aria-label="Toggle mobile menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu" role="menu" aria-hidden="true">
+      <a href="#explore" class="mobile-link" role="menuitem">Explore</a>
+      <a href="#food-culture" class="mobile-link" role="menuitem">Food</a>
+      <a href="#nature" class="mobile-link" role="menuitem">Nature</a>
+      <a href="#heritage" class="mobile-link" role="menuitem">Heritage</a>
+      <a href="#ai-guide" class="mobile-link" role="menuitem">AI Guide</a>
+    </div>
+  </nav>
+
+  <!-- Optional Groq API Key Panel (fallback AI) -->
+  <div class="groq-panel" id="groqPanel" role="dialog" aria-modal="true" aria-labelledby="groqPanelTitle" hidden>
+    <div class="groq-panel-box">
+      <h3 id="groqPanelTitle">⚡ Optional: Groq Fallback AI</h3>
+      <p>CultureRoam uses <strong>Pollinations.ai for free AI</strong> (no key needed!). Optionally add a free <a href="https://console.groq.com" target="_blank" rel="noopener noreferrer">Groq key</a> for Llama 3.3 70B as backup.</p>
+      <div class="groq-input-row">
+        <label for="groqKeyInput" class="sr-only">Groq API Key (optional)</label>
+        <input type="password" id="groqKeyInput" class="groq-input" placeholder="gsk_..." autocomplete="off" aria-describedby="groqHint" />
+        <button class="btn-primary" id="saveGroqKey">Save</button>
+      </div>
+      <p id="groqHint" style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:0.5rem;">Free at <a href="https://console.groq.com" target="_blank" rel="noopener noreferrer" style="color:#6c63ff;">console.groq.com</a> — no credit card required</p>
+      <button class="btn-ghost" id="closeGroqPanel" style="margin-top:1rem;width:100%;">Close</button>
+    </div>
+  </div>
+
+  <!-- ========== HERO ========== -->
+  <section id="hero" class="hero" aria-labelledby="heroTitle">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="hero-particles" id="heroParticles"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot" aria-hidden="true"></span>
+        <span>Powered by Groq &amp; Pollinations AI</span>
+      </div>
+      <h1 id="heroTitle" class="hero-title">
+        Discover India's<br />
+        <span class="gradient-text">Soul & Stories</span>
+      </h1>
+      <p class="hero-subtitle">
+        GenAI-powered travel discovery — from Indore's legendary street food scene to monsoon waterfalls, 
+        heritage trains, and hidden cultural gems. Your authentic Indian journey starts here.
+      </p>
+      <div class="hero-search" role="search" aria-label="Destination search">
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input
+            type="text"
+            id="destinationSearch"
+            class="search-input"
+            placeholder="Search a destination (e.g. Indore, Ujjain, Bhopal...)"
+            aria-label="Search destination"
+            autocomplete="off"
+          />
+          <button class="search-btn" id="searchBtn" aria-label="Search destination">
+            Explore <span aria-hidden="true">→</span>
+          </button>
+        </div>
+        <div class="quick-tags" role="list" aria-label="Quick destination suggestions">
+          <button class="tag" role="listitem" data-dest="Indore">🌆 Indore</button>
+          <button class="tag" role="listitem" data-dest="Ujjain">🕉 Ujjain</button>
+          <button class="tag" role="listitem" data-dest="Mandu">🏰 Mandu</button>
+          <button class="tag" role="listitem" data-dest="Maheshwar">⛵ Maheshwar</button>
+          <button class="tag" role="listitem" data-dest="Omkareshwar">🛕 Omkareshwar</button>
+        </div>
+      </div>
+      <div class="hero-stats" aria-label="Platform statistics">
+        <div class="stat">
+          <strong>50+</strong><span>Destinations</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat">
+          <strong>200+</strong><span>Hidden Gems</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat">
+          <strong>AI</strong><span>Storytelling</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll" aria-hidden="true">
+      <div class="scroll-indicator"></div>
+    </div>
+  </section>
+
+  <!-- ========== AI DESTINATION RESULT ========== -->
+  <section id="ai-result" class="ai-result hidden" aria-live="polite" aria-label="AI destination insights">
+    <div class="container">
+      <div class="section-header">
+        <div class="ai-badge">
+          <span class="ai-pulse" aria-hidden="true"></span>
+          <span>CultureRoam AI Insights</span>
+        </div>
+        <h2 class="section-title" id="aiResultTitle">Discovering...</h2>
+      </div>
+      <div class="ai-story-card" id="aiStoryCard">
+        <div class="story-loader" id="storyLoader" aria-label="Loading AI content" role="status">
+          <div class="loader-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <p>AI is discovering your destination…</p>
+        </div>
+        <div class="story-content" id="storyContent" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== EXPLORE CARDS ========== -->
+  <section id="explore" class="explore-section" aria-labelledby="exploreTitle">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">AI-Curated Experiences</p>
+        <h2 id="exploreTitle" class="section-title">Explore <span class="gradient-text">Indore</span></h2>
+        <p class="section-desc">India's cleanest city and food capital — a perfect blend of culture, cuisine, nature, and heritage</p>
+      </div>
+      <div class="explore-grid" role="list" aria-label="Destination categories">
+        <article class="explore-card" role="listitem" tabindex="0" data-category="food" aria-label="Food Culture category">
+          <div class="card-img-wrap">
+            <img src="assets/food_market.png" alt="Vibrant Indian street food market with illuminated stalls" class="card-img" loading="lazy" />
+            <div class="card-overlay" aria-hidden="true"></div>
+          </div>
+          <div class="card-body">
+            <span class="card-tag">🍛 Street Food</span>
+            <h3 class="card-title">Sarafa & Chappan Dukan</h3>
+            <p class="card-desc">Indore's twin food paradises. From the legendary night market at Sarafa Bazaar to the 56-shop wonderland of Chappan Dukan.</p>
+            <button class="card-cta" data-prompt="Tell me about Sarafa Bazaar and Chappan Dukan food experience in Indore with specific dishes, timings, and cultural significance" aria-label="Explore Sarafa and Chappan Dukan food experiences">
+              Explore <span aria-hidden="true">✨</span>
+            </button>
+          </div>
+        </article>
+
+        <article class="explore-card featured" role="listitem" tabindex="0" data-category="nature" aria-label="Waterfalls and Nature category">
+          <div class="card-img-wrap">
+            <img src="assets/waterfall_nature.png" alt="Dramatic waterfall cascading through monsoon forest" class="card-img" loading="lazy" />
+            <div class="card-overlay" aria-hidden="true"></div>
+            <span class="featured-badge" aria-label="Featured destination">⭐ Top Pick</span>
+          </div>
+          <div class="card-body">
+            <span class="card-tag">🌿 Nature & Monsoon</span>
+            <h3 class="card-title">Patalpani & Tincha Falls</h3>
+            <p class="card-desc">A 300-foot plunge into emerald pools. Monsoon transforms these waterfalls into breathtaking curtains of mist and thunder.</p>
+            <button class="card-cta" data-prompt="Describe the Patalpani and Tincha Falls near Indore, best time to visit, how to reach, safety tips, and the magical monsoon experience" aria-label="Explore Patalpani and Tincha Falls">
+              Explore <span aria-hidden="true">✨</span>
+            </button>
+          </div>
+        </article>
+
+        <article class="explore-card" role="listitem" tabindex="0" data-category="heritage" aria-label="Heritage Train category">
+          <div class="card-img-wrap">
+            <img src="assets/heritage_train.png" alt="Scenic heritage train traveling through green monsoon hills" class="card-img" loading="lazy" />
+            <div class="card-overlay" aria-hidden="true"></div>
+          </div>
+          <div class="card-body">
+            <span class="card-tag">🚂 Heritage</span>
+            <h3 class="card-title">Patalpani Heritage Train</h3>
+            <p class="card-desc">A legendary monsoon ritual. This scenic Vistadome train winds 10km through tunnels and bridges over the Vindhya Range.</p>
+            <button class="card-cta" data-prompt="Tell me about the Patalpani-Kalakund Heritage Train near Indore, its scenic route through Vindhya Range, Vistadome coaches, monsoon experience and how to book tickets" aria-label="Explore Patalpani Heritage Train">
+              Explore <span aria-hidden="true">✨</span>
+            </button>
+          </div>
+        </article>
+
+        <article class="explore-card" role="listitem" tabindex="0" data-category="temples" aria-label="Temples and Spiritual category">
+          <div class="card-img-wrap">
+            <img src="assets/temple_attraction.png" alt="Ancient Indian temple with golden spires at sunset" class="card-img" loading="lazy" />
+            <div class="card-overlay" aria-hidden="true"></div>
+          </div>
+          <div class="card-body">
+            <span class="card-tag">🛕 Spiritual</span>
+            <h3 class="card-title">Khajrana & Lal Baag</h3>
+            <p class="card-desc">The famous Khajrana Ganesh Temple draws millions, while Lal Baag Palace echoes the opulence of Holkar rulers.</p>
+            <button class="card-cta" data-prompt="Tell me about Khajrana Ganesh Temple and Lal Baag Palace in Indore, their history, cultural significance, visiting hours and spiritual importance" aria-label="Explore Khajrana Temple and Lal Baag Palace">
+              Explore <span aria-hidden="true">✨</span>
+            </button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FOOD CULTURE DEEP DIVE ========== -->
+  <section id="food-culture" class="food-section" aria-labelledby="foodTitle">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Culinary Heritage</p>
+        <h2 id="foodTitle" class="section-title">Indore's <span class="gradient-text">Food Universe</span></h2>
+        <p class="section-desc">Named India's cleanest city 7 times, Indore is also the undisputed food capital of Madhya Pradesh</p>
+      </div>
+
+      <div class="food-zones">
+        <div class="food-zone-tabs" role="tablist" aria-label="Food zones">
+          <button class="zone-tab active" role="tab" aria-selected="true" aria-controls="zone-sarafa" id="tab-sarafa" data-zone="sarafa">
+            🌙 Sarafa Bazaar
+          </button>
+          <button class="zone-tab" role="tab" aria-selected="false" aria-controls="zone-chappan" id="tab-chappan" data-zone="chappan">
+            🍴 Chappan Dukan
+          </button>
+          <button class="zone-tab" role="tab" aria-selected="false" aria-controls="zone-breakfast" id="tab-breakfast" data-zone="breakfast">
+            ☀️ Morning Breakfast
+          </button>
+        </div>
+
+        <div id="zone-sarafa" class="zone-content active" role="tabpanel" aria-labelledby="tab-sarafa">
+          <div class="zone-header">
+            <div class="zone-info">
+              <h3>Sarafa Bazaar — The Night Food Carnival</h3>
+              <p>A jewellery market by day, Sarafa transforms after 8 PM into one of India's most electrifying street food experiences. Vendors line the streets serving hundreds of iconic dishes under brilliant lights.</p>
+              <div class="zone-meta">
+                <span class="meta-tag">⏰ Open: 8 PM – 2 AM</span>
+                <span class="meta-tag">📍 Sarafa, Indore</span>
+                <span class="meta-tag">💰 ₹20-80 per dish</span>
+              </div>
+            </div>
+          </div>
+          <div class="dish-grid">
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">🌽</div>
+              <h4>Bhutte ka Kees</h4>
+              <p>Grated corn slow-cooked in milk & spices. Indore's signature — a must-try.</p>
+              <span class="dish-rating" aria-label="Rating 5 out of 5">★★★★★</span>
+            </div>
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">🥟</div>
+              <h4>Joshi Dahi Vada</h4>
+              <p>Ultra-soft vadas served with dramatic flair — bowls tossed in the air!</p>
+              <span class="dish-rating" aria-label="Rating 5 out of 5">★★★★★</span>
+            </div>
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">🥔</div>
+              <h4>Garadu</h4>
+              <p>Crispy spiced fried yam — a beloved seasonal Indori street snack.</p>
+              <span class="dish-rating" aria-label="Rating 4 out of 5">★★★★☆</span>
+            </div>
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">🥥</div>
+              <h4>Kopra Patties</h4>
+              <p>Mashed potato stuffed with grated coconut, deep-fried to golden perfection.</p>
+              <span class="dish-rating" aria-label="Rating 5 out of 5">★★★★★</span>
+            </div>
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">🍬</div>
+              <h4>Rabdi Jalebi</h4>
+              <p>Crispy spirals of jalebi drenched in thick creamy rabdi. Sweet perfection.</p>
+              <span class="dish-rating" aria-label="Rating 5 out of 5">★★★★★</span>
+            </div>
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">🌶️</div>
+              <h4>Spicy Chaat</h4>
+              <p>Multiple varieties of the spiciest chaats you'll find anywhere in India.</p>
+              <span class="dish-rating" aria-label="Rating 4 out of 5">★★★★☆</span>
+            </div>
+          </div>
+          <button class="ai-story-btn" data-prompt="Create an immersive story about a first-time visitor experiencing Sarafa Bazaar night market in Indore — the sights, sounds, smells, flavors, and the cultural magic of India's legendary night food street" aria-label="Generate AI story about Sarafa Bazaar">
+            <span aria-hidden="true">✨</span> Generate Immersive AI Story
+          </button>
+        </div>
+
+        <div id="zone-chappan" class="zone-content" role="tabpanel" aria-labelledby="tab-chappan" hidden>
+          <div class="zone-header">
+            <div class="zone-info">
+              <h3>Chappan Dukan — The 56-Shop Paradise</h3>
+              <p>Named after its 56 legendary stalls, this area is Indore's modern food hub — accessible day and evening, catering to every craving from hot dogs to elaborate desserts.</p>
+              <div class="zone-meta">
+                <span class="meta-tag">⏰ Open: 10 AM – 11 PM</span>
+                <span class="meta-tag">📍 Palasikar Colony</span>
+                <span class="meta-tag">💰 ₹30-150 per item</span>
+              </div>
+            </div>
+          </div>
+          <div class="dish-grid">
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">🌭</div>
+              <h4>Johny Hot Dog</h4>
+              <p>The legendary vegetarian hot dog — a Chappan icon with its own devoted following.</p>
+              <span class="dish-rating" aria-label="Rating 5 out of 5">★★★★★</span>
+            </div>
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">🥙</div>
+              <h4>Vijay Chaat House</h4>
+              <p>The original home of Kopra Patties — kachori and khaman also divine.</p>
+              <span class="dish-rating" aria-label="Rating 5 out of 5">★★★★★</span>
+            </div>
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">🫙</div>
+              <h4>Young Tarang</h4>
+              <p>Famous for Poha-Jalebi and creative pani puri variants that locals swear by.</p>
+              <span class="dish-rating" aria-label="Rating 4 out of 5">★★★★☆</span>
+            </div>
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">🍨</div>
+              <h4>Falooda Kulfi</h4>
+              <p>Elaborate desserts — layers of vermicelli, rose syrup, and rich kulfi ice cream.</p>
+              <span class="dish-rating" aria-label="Rating 5 out of 5">★★★★★</span>
+            </div>
+          </div>
+          <button class="ai-story-btn" data-prompt="Describe the vibrant atmosphere of Chappan Dukan in Indore — the famous stalls, the unique dishes, the buzzing crowd, why it's special and different from other food streets in India" aria-label="Generate AI story about Chappan Dukan">
+            <span aria-hidden="true">✨</span> Generate Immersive AI Story
+          </button>
+        </div>
+
+        <div id="zone-breakfast" class="zone-content" role="tabpanel" aria-labelledby="tab-breakfast" hidden>
+          <div class="zone-header">
+            <div class="zone-info">
+              <h3>Morning Indore — The Breakfast Ritual</h3>
+              <p>Indore mornings are a ritual. The iconic Poha-Jalebi breakfast is a cultural institution — locals gather at roadside stalls for this beloved combination that defines the city's culinary soul.</p>
+              <div class="zone-meta">
+                <span class="meta-tag">⏰ Open: 6 AM – 11 AM</span>
+                <span class="meta-tag">📍 Citywide</span>
+                <span class="meta-tag">💰 ₹10-30 per dish</span>
+              </div>
+            </div>
+          </div>
+          <div class="dish-grid">
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">🍽️</div>
+              <h4>Poha-Jalebi</h4>
+              <p>The quintessential Indore breakfast — fluffy pressed rice paired with crispy sweet jalebi.</p>
+              <span class="dish-rating" aria-label="Rating 5 out of 5">★★★★★</span>
+            </div>
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">🫕</div>
+              <h4>Kachori Sabzi</h4>
+              <p>Flaky deep-fried pastries served with spiced potato curry — a morning classic.</p>
+              <span class="dish-rating" aria-label="Rating 5 out of 5">★★★★★</span>
+            </div>
+            <div class="dish-card" tabindex="0">
+              <div class="dish-emoji" aria-hidden="true">☕</div>
+              <h4>Sev Usal</h4>
+              <p>Sprouted white peas in spicy gravy topped with sev and onions. Hearty and warming.</p>
+              <span class="dish-rating" aria-label="Rating 4 out of 5">★★★★☆</span>
+            </div>
+          </div>
+          <button class="ai-story-btn" data-prompt="Paint a poetic picture of waking up in Indore and experiencing the morning breakfast culture — the Poha-Jalebi ritual, the street-side ambiance, locals chatting, and why this breakfast experience is a window into Indori culture" aria-label="Generate AI story about Indore morning breakfast culture">
+            <span aria-hidden="true">✨</span> Generate Immersive AI Story
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== NATURE & WATERFALLS ========== -->
+  <section id="nature" class="nature-section" aria-labelledby="natureTitle">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Monsoon Magic</p>
+        <h2 id="natureTitle" class="section-title">Nature's <span class="gradient-text">Grand Canvas</span></h2>
+        <p class="section-desc">July–September transforms the Vindhya hills around Indore into a lush, cascading paradise</p>
+      </div>
+      <div class="nature-grid">
+        <div class="nature-card" tabindex="0" aria-label="Patalpani Waterfall">
+          <div class="nature-icon" aria-hidden="true">💧</div>
+          <h3>Patalpani Falls</h3>
+          <div class="nature-meta">
+            <span>📍 35 km from Indore</span>
+            <span>↕ 300 ft drop</span>
+          </div>
+          <p>India's most dramatic monsoon waterfall plunges into a deep gorge called "gateway to the underworld." Best July–August when it's at full thundering force.</p>
+          <div class="nature-tags">
+            <span class="ntag">Trekking</span>
+            <span class="ntag">Photography</span>
+            <span class="ntag">Monsoon Must</span>
+          </div>
+          <button class="nature-ai-btn" data-prompt="Describe Patalpani Waterfall near Indore in vivid, immersive detail — the 300-foot plunge, the monsoon atmosphere, the journey getting there, safety precautions, and why it's spiritually and naturally significant" aria-label="AI insights about Patalpani Falls">
+            <span aria-hidden="true">🤖</span> AI Insights
+          </button>
+        </div>
+
+        <div class="nature-card highlight" tabindex="0" aria-label="Tincha Falls">
+          <div class="nature-icon" aria-hidden="true">🌊</div>
+          <h3>Tincha Falls</h3>
+          <div class="nature-meta">
+            <span>📍 25 km from Indore</span>
+            <span>3 tiers</span>
+          </div>
+          <p>Three cascading tiers of waterfalls surrounded by lush greenery. Perfect for families and photographers — more accessible and serene than Patalpani.</p>
+          <div class="nature-tags">
+            <span class="ntag">Family Friendly</span>
+            <span class="ntag">Photography</span>
+            <span class="ntag">Peaceful</span>
+          </div>
+          <button class="nature-ai-btn" data-prompt="Describe Tincha Falls near Indore — its three magical tiers, the lush green surroundings, the best vantage points, how to reach it, and the ideal time for a visit during monsoon season" aria-label="AI insights about Tincha Falls">
+            <span aria-hidden="true">🤖</span> AI Insights
+          </button>
+        </div>
+
+        <div class="nature-card" tabindex="0" aria-label="Ralamandal Wildlife Sanctuary">
+          <div class="nature-icon" aria-hidden="true">🦌</div>
+          <h3>Ralamandal Sanctuary</h3>
+          <div class="nature-meta">
+            <span>📍 15 km from Indore</span>
+            <span>Forest Trek</span>
+          </div>
+          <p>A dense wildlife sanctuary that bursts into vivid life during monsoon. Spot deer and exotic birds while trekking through emerald forest trails.</p>
+          <div class="nature-tags">
+            <span class="ntag">Wildlife</span>
+            <span class="ntag">Trekking</span>
+            <span class="ntag">Birding</span>
+          </div>
+          <button class="nature-ai-btn" data-prompt="Describe Ralamandal Wildlife Sanctuary near Indore — the wildlife you can spot, trekking trails, monsoon atmosphere, bird species, and why it's a hidden gem for nature lovers visiting the city" aria-label="AI insights about Ralamandal Wildlife Sanctuary">
+            <span aria-hidden="true">🤖</span> AI Insights
+          </button>
+        </div>
+
+        <div class="nature-card" tabindex="0" aria-label="Janapav Hill">
+          <div class="nature-icon" aria-hidden="true">⛰️</div>
+          <h3>Janapav Hills</h3>
+          <div class="nature-meta">
+            <span>📍 45 km from Indore</span>
+            <span>Hill Station</span>
+          </div>
+          <p>The birthplace of Lord Parshuram according to Hindu mythology. A beautiful hill station with panoramic views over the Vindhya ranges.</p>
+          <div class="nature-tags">
+            <span class="ntag">Spiritual</span>
+            <span class="ntag">Panoramic Views</span>
+            <span class="ntag">Hill Trek</span>
+          </div>
+          <button class="nature-ai-btn" data-prompt="Tell me about Janapav Hills near Indore — its mythological significance as birthplace of Lord Parshuram, the trekking experience, panoramic views, and the peaceful atmosphere that makes it a perfect day trip" aria-label="AI insights about Janapav Hills">
+            <span aria-hidden="true">🤖</span> AI Insights
+          </button>
+        </div>
+
+        <div class="nature-card" tabindex="0" aria-label="Gulawat Lotus Valley">
+          <div class="nature-icon" aria-hidden="true">🌸</div>
+          <h3>Gulawat Lotus Valley</h3>
+          <div class="nature-meta">
+            <span>📍 40 km from Indore</span>
+            <span>Scenic Valley</span>
+          </div>
+          <p>A breathtaking valley carpeted with thousands of lotus flowers. During monsoon, the water levels rise and create a surreal, mirror-like landscape.</p>
+          <div class="nature-tags">
+            <span class="ntag">Scenic</span>
+            <span class="ntag">Lotus Season</span>
+            <span class="ntag">Photography</span>
+          </div>
+          <button class="nature-ai-btn" data-prompt="Describe Gulawat Lotus Valley near Indore — the thousands of blooming lotuses, the best time to visit, the boat rides, the scenic beauty and why it's one of the most underrated natural wonders near the city" aria-label="AI insights about Gulawat Lotus Valley">
+            <span aria-hidden="true">🤖</span> AI Insights
+          </button>
+        </div>
+
+        <div class="nature-card" tabindex="0" aria-label="Hidden Waterfalls">
+          <div class="nature-icon" aria-hidden="true">🗺️</div>
+          <h3>Hidden Gems Trail</h3>
+          <div class="nature-meta">
+            <span>Gidiya Khoh, Chidiya Bhadak</span>
+          </div>
+          <p>Gidiya Khoh at 600 feet and the mysterious Chidiya Bhadak — lesser-known waterfalls for adventurous travelers who seek solitude and raw nature.</p>
+          <div class="nature-tags">
+            <span class="ntag">Adventure</span>
+            <span class="ntag">Hidden Gem</span>
+            <span class="ntag">600 ft Fall</span>
+          </div>
+          <button class="nature-ai-btn" data-prompt="Tell me about the hidden waterfall gems near Indore — Gidiya Khoh at 600 feet height, Chidiya Bhadak, Bamniya Kund, and Sitlamata Falls — how to find them, what makes each unique, and travel tips for adventurous explorers" aria-label="AI insights about hidden waterfall gems near Indore">
+            <span aria-hidden="true">🤖</span> AI Insights
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== HERITAGE TRAIN ========== -->
+  <section id="heritage" class="heritage-section" aria-labelledby="heritageTitle">
+    <div class="heritage-content">
+      <div class="heritage-left">
+        <p class="section-eyebrow">Monsoon Special</p>
+        <h2 id="heritageTitle" class="section-title">The <span class="gradient-text">Heritage Train</span> Experience</h2>
+        <p class="heritage-desc">
+          Every monsoon, the legendary Patalpani–Kalakund Heritage Train awakens. This scenic 10 km journey 
+          through the mist-covered Vindhya Range is Indore's most iconic cultural experience — tunnels, bridges, 
+          waterfalls, and panoramic views from Vistadome coaches.
+        </p>
+        <div class="heritage-features">
+          <div class="heritage-feat">
+            <span class="feat-icon" aria-hidden="true">🚃</span>
+            <div>
+              <strong>Vistadome Coaches</strong>
+              <p>Glass-roof panoramic carriages for unobstructed views</p>
+            </div>
+          </div>
+          <div class="heritage-feat">
+            <span class="feat-icon" aria-hidden="true">🗻</span>
+            <div>
+              <strong>Vindhya Range</strong>
+              <p>Passes through tunnels, bridges, and lush green hills</p>
+            </div>
+          </div>
+          <div class="heritage-feat">
+            <span class="feat-icon" aria-hidden="true">📅</span>
+            <div>
+              <strong>Monsoon Season</strong>
+              <p>Runs weekends in July–September via IRCTC booking</p>
+            </div>
+          </div>
+          <div class="heritage-feat">
+            <span class="feat-icon" aria-hidden="true">📏</span>
+            <div>
+              <strong>9.5 km Scenic Route</strong>
+              <p>Patalpani to Kalakund through pristine wilderness</p>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary" id="heritageStoryBtn" data-prompt="Write a vivid, cinematic story of riding the Patalpani-Kalakund Heritage Train during monsoon — the misty Vindhya mountains, the sound of rain on the Vistadome glass, passing through tunnels with waterfalls visible outside, the excitement of other travelers, and why this train ride is a deeply emotional cultural experience" aria-label="Generate AI story about the Heritage Train experience">
+          <span aria-hidden="true">✨</span> Generate AI Journey Story
+        </button>
+      </div>
+      <div class="heritage-right" aria-hidden="true">
+        <div class="train-visual">
+          <img src="assets/heritage_train.png" alt="Heritage train traveling through monsoon green Vindhya mountains" class="train-img" loading="lazy" />
+          <div class="train-stats">
+            <div class="train-stat">
+              <strong>9.5</strong>
+              <span>km route</span>
+            </div>
+            <div class="train-stat">
+              <strong>100+</strong>
+              <span>years old</span>
+            </div>
+            <div class="train-stat">
+              <strong>4</strong>
+              <span>tunnels</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== AI GUIDE PANEL ========== -->
+  <section id="ai-guide" class="ai-guide-section" aria-labelledby="aiGuideTitle">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Your AI Travel Companion</p>
+        <h2 id="aiGuideTitle" class="section-title">Ask <span class="gradient-text">CultureRoam AI</span></h2>
+        <p class="section-desc">Get personalized itineraries, local tips, hidden gems, cultural insights, and immersive stories</p>
+      </div>
+
+      <div class="ai-guide-layout">
+        <div class="quick-prompts" role="list" aria-label="Suggested AI questions">
+          <p class="quick-label">Suggested Questions</p>
+          <button class="quick-prompt-btn" role="listitem" data-prompt="Create a perfect 2-day Indore itinerary for a first-time visitor covering food, culture, nature and heritage" aria-label="Ask AI for 2-day Indore itinerary">🗺️ 2-Day Indore Itinerary</button>
+          <button class="quick-prompt-btn" role="listitem" data-prompt="What are the best hidden gems and offbeat experiences near Indore that most tourists miss?" aria-label="Ask AI about hidden gems near Indore">💎 Hidden Gems Near Indore</button>
+          <button class="quick-prompt-btn" role="listitem" data-prompt="Tell me about the cultural festivals and local events in Indore throughout the year" aria-label="Ask AI about Indore festivals and events">🎭 Festivals & Local Events</button>
+          <button class="quick-prompt-btn" role="listitem" data-prompt="What is the best monsoon travel plan for Indore and surrounding areas with waterfalls and heritage train?" aria-label="Ask AI for monsoon travel plan for Indore">🌧️ Monsoon Travel Guide</button>
+          <button class="quick-prompt-btn" role="listitem" data-prompt="How can I connect with local artisans, craftspeople, and authentic cultural experiences in Indore?" aria-label="Ask AI how to connect with local artisans in Indore">🏺 Local Artisan Experiences</button>
+          <button class="quick-prompt-btn" role="listitem" data-prompt="Compare visiting Indore vs Ujjain vs Mandu — which is best for what kind of traveler?" aria-label="Ask AI to compare Indore, Ujjain and Mandu for travelers">⚖️ Indore vs Ujjain vs Mandu</button>
+        </div>
+
+        <div class="ai-chat-panel">
+          <div class="chat-header">
+            <div class="chat-avatar" aria-hidden="true">🤖</div>
+            <div class="chat-info">
+              <strong>CultureRoam AI</strong>
+              <span class="chat-status" id="chatStatus">Groq / Pollinations AI</span>
+            </div>
+          </div>
+          <div class="chat-messages" id="chatMessages" role="log" aria-live="polite" aria-label="AI conversation">
+            <div class="chat-msg ai-msg" role="article">
+              <div class="msg-bubble">
+                <p>Namaste! 🙏 I'm your AI cultural guide. Ask me about <strong>any destination in India</strong> — I'll generate immersive stories, uncover hidden gems, suggest local events, and create personalized itineraries.</p>
+                <p style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.8;">💡 Click any suggested question on the left, or type your own below.</p>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-area">
+            <label for="chatInput" class="sr-only">Type your question to CultureRoam AI</label>
+            <textarea
+              id="chatInput"
+              class="chat-input"
+              placeholder="Ask about any destination, food, culture, or experience..."
+              rows="2"
+              aria-label="Ask CultureRoam AI a question"
+            ></textarea>
+            <button class="chat-send" id="chatSend" aria-label="Send message to AI">
+              <span aria-hidden="true">➤</span>
+            </button>
+          </div>
+          <p class="chat-note" style="color: rgba(16,185,129,0.7);">✅ AI active — ask me anything about India!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== AI INSIGHTS MODAL ========== -->
+  <div class="insights-modal" id="insightsModal" role="dialog" aria-modal="true" aria-labelledby="insightsTitle" hidden>
+    <div class="insights-box">
+      <div class="insights-header">
+        <div class="insights-badge">
+          <span class="ai-pulse" aria-hidden="true"></span>
+          <span>CultureRoam AI Story</span>
+        </div>
+        <button class="close-insights" id="closeInsights" aria-label="Close AI insights">✕</button>
+      </div>
+      <h2 id="insightsTitle" class="insights-title">Generating Story...</h2>
+      <div class="insights-content" id="insightsContent" role="status" aria-live="polite">
+        <div class="loader-dots large">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="logo-icon" aria-hidden="true">🌏</span>
+          <span class="logo-text">CultureRoam</span>
+          <p>Powered by Groq & Pollinations AI. Discover India's authentic soul — one story at a time.</p>
+          <p class="footer-tech">Built with ❤️ for cultural discovery | GenAI Hackathon 2026</p>
+        </div>
+        <nav class="footer-nav" aria-label="Footer navigation">
+          <h3>Explore</h3>
+          <ul role="list">
+            <li><a href="#explore">Destinations</a></li>
+            <li><a href="#food-culture">Food Culture</a></li>
+            <li><a href="#nature">Nature & Waterfalls</a></li>
+            <li><a href="#heritage">Heritage Experiences</a></li>
+          </ul>
+        </nav>
+        <div class="footer-info">
+          <h3>AI Features</h3>
+          <ul role="list">
+            <li>🎨 Immersive Storytelling</li>
+            <li>💎 Hidden Gem Discovery</li>
+            <li>🗺️ Smart Itineraries</li>
+            <li>🎭 Cultural Event Insights</li>
+            <li>🏺 Local Experience Guide</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 CultureRoam. Powered by Groq Llama & Pollinations AI for authentic cultural discovery.</p>
+        <p class="disclaimer">This platform uses AI-generated content. Always verify travel details with official sources before visiting.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
