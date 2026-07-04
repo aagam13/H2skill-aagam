@@ -78,6 +78,83 @@ const RateLimiter = (() => {
 })();
 
 /* =============================================
+   TRAVEL CACHE
+   ============================================= */
+/**
+ * TravelCache Manager
+ * Implements client-side in-memory and sessionStorage caching
+ * to reduce redundant API calls and optimize loading times.
+ */
+const TravelCache = (() => {
+  const memCache = {};
+  const KEY_PREFIX = 'cr_story_';
+
+  return {
+    /**
+     * Retrieves a cached travel story
+     * @param {string} prompt - The prompt query key
+     * @returns {string|null} The cached content, or null
+     */
+    get(prompt) {
+      if (!prompt) return null;
+      const cacheKey = prompt.trim();
+      // Try memory cache first
+      if (memCache[cacheKey]) {
+        console.log('[Cache] In-memory hit:', cacheKey.slice(0, 30));
+        return memCache[cacheKey];
+      }
+      // Try sessionStorage
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          const stored = sessionStorage.getItem(KEY_PREFIX + btoa(encodeURIComponent(cacheKey)));
+          if (stored) {
+            console.log('[Cache] SessionStorage hit:', cacheKey.slice(0, 30));
+            memCache[cacheKey] = stored;
+            return stored;
+          }
+        }
+      } catch (_) {}
+      return null;
+    },
+
+    /**
+     * Saves a travel story into cache
+     * @param {string} prompt - The prompt query key
+     * @param {string} text - The content text to save
+     */
+    set(prompt, text) {
+      if (!prompt || !text) return;
+      const cacheKey = prompt.trim();
+      memCache[cacheKey] = text;
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem(KEY_PREFIX + btoa(encodeURIComponent(cacheKey)), text);
+        }
+      } catch (_) {}
+    },
+
+    /**
+     * Clears all cached items
+     */
+    clear() {
+      for (const k in memCache) delete memCache[k];
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          const keysToRemove = [];
+          for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key && key.startsWith(KEY_PREFIX)) {
+              keysToRemove.push(key);
+            }
+          }
+          keysToRemove.forEach(k => sessionStorage.removeItem(k));
+        }
+      } catch (_) {}
+    }
+  };
+})();
+
+/* =============================================
    SYSTEM PROMPT
    ============================================= */
 const SYSTEM = `You are CultureRoam AI, India's most passionate cultural travel guide.
@@ -201,15 +278,31 @@ const DemoContent = {
    AI ROUTER — Tries in order: Groq → Pollinations → Demo
    ============================================= */
 const AI = {
+  /**
+   * Generates travel stories, routing requests through cache -> Groq -> Pollinations -> Demo
+   * @param {string} prompt - The query request prompt
+   * @param {Object} [options] - Options configuration
+   * @param {boolean} [options.allowDemo=true] - Allows falling back to pre-written stories if AI is down
+   * @returns {Promise<string>} Immersive travel story
+   */
   async generate(prompt, { allowDemo = true } = {}) {
+    // 1. Check client-side cache first
+    const cached = TravelCache.get(prompt);
+    if (cached) return cached;
+
+    // 2. Perform rate limit checking
     const rate = RateLimiter.check();
     if (!rate.ok) throw new Error(`RATE:${rate.wait}`);
 
-    // Try Groq first if user has key (more reliable)
+    let text;
+
+    // 3. Try Groq Llama 3.3 first (if key is set)
     if (StateManager.hasGroqKey()) {
       try {
         console.log('[AI] Trying Groq…');
-        return await GroqAI.generate(prompt);
+        text = await GroqAI.generate(prompt);
+        TravelCache.set(prompt, text);
+        return text;
       } catch (e) {
         console.warn('[AI] Groq failed:', e.message);
         if (e.message === 'GROQ_AUTH') {
@@ -219,19 +312,22 @@ const AI = {
       }
     }
 
-    // Try Pollinations GET (free, no key)
+    // 4. Try Pollinations GET (free, keyless)
     try {
       console.log('[AI] Trying Pollinations GET…');
-      return await PollinationsAI.generate(prompt);
+      text = await PollinationsAI.generate(prompt);
+      TravelCache.set(prompt, text);
+      return text;
     } catch (e) {
       console.warn('[AI] Pollinations failed:', e.message);
     }
 
-    // Fallback: curated demo content
+    // 5. Curated demo content fallback
     if (allowDemo) {
       console.log('[AI] Using demo content fallback');
       const dest = StateManager.get('lastQuery') || '';
-      return DemoContent.get(dest) + '\n\n*— CultureRoam curated content (AI temporarily unavailable)*';
+      text = DemoContent.get(dest) + '\n\n*— CultureRoam curated content (AI temporarily unavailable)*';
+      return text;
     }
 
     throw new Error('ALL_FAILED');
@@ -464,12 +560,20 @@ function openInsightsModal(title, prompt) {
         <div style="text-align:center;padding:2rem;">
           <p style="font-size:2rem;margin-bottom:1rem;">💭</p>
           <p style="color:rgba(255,255,255,0.6);line-height:1.7;">${Utils.escapeHtml(Utils.getErrorMessage(err))}</p>
-          <button onclick="document.getElementById('openGroqPanel').click(); closeInsightsModal();"
+          <button id="errAddGroqBtn"
             style="margin-top:1.5rem;background:linear-gradient(135deg,#6c63ff,#8b5cf6);border:none;color:#fff;
             padding:10px 22px;border-radius:24px;font-family:'Outfit',sans-serif;cursor:pointer;font-weight:600;">
             ⚡ Add Free Groq Key for Better AI
           </button>
         </div>`;
+      
+      const btn = document.getElementById('errAddGroqBtn');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          document.getElementById('openGroqPanel')?.click();
+          closeInsightsModal();
+        });
+      }
     });
 }
 
@@ -702,5 +806,5 @@ if (typeof document !== 'undefined') {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { Config, StateManager, RateLimiter, AI, Utils, PollinationsAI, GroqAI };
+  module.exports = { Config, StateManager, RateLimiter, AI, Utils, PollinationsAI, GroqAI, TravelCache, DemoContent };
 }
