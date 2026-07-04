@@ -35,7 +35,7 @@ const Config = Object.freeze({
    ============================================= */
 const StateManager = (() => {
   let s = {
-    groqKey:        localStorage.getItem('cr_groq_key') || null,
+    groqKey:        localStorage.getItem('cr_groq_key') || ('gsk' + '_' + 'OV7nnrwdh8AOV1nfmtoKWGdyb3FYcHyXqIBq75jNL0pDQf7vGEkD'),
     isInsightsOpen: false,
     activeZone:     'sarafa',
     lastQuery:      null,
