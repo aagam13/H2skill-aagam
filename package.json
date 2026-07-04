@@ -1,0 +1,24 @@
+{
+  "name": "cultureroam",
+  "version": "1.0.0",
+  "description": "> **Hackathon Project — GenAI Powered Cultural Tourism Platform**",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aagam13/H2skill-aagam.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/aagam13/H2skill-aagam/issues"
+  },
+  "homepage": "https://github.com/aagam13/H2skill-aagam#readme",
+  "devDependencies": {
+    "jest": "^30.4.2"
+  }
+}

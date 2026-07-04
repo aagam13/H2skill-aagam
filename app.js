@@ -35,7 +35,7 @@ const Config = Object.freeze({
    ============================================= */
 const StateManager = (() => {
   let s = {
-    groqKey:        localStorage.getItem('cr_groq_key') || ('gsk' + '_' + 'OV7nnrwdh8AOV1nfmtoKWGdyb3FYcHyXqIBq75jNL0pDQf7vGEkD'),
+    groqKey:        (typeof localStorage !== 'undefined' ? localStorage.getItem('cr_groq_key') : null) || ('gsk' + '_' + 'OV7nnrwdh8AOV1nfmtoKWGdyb3FYcHyXqIBq75jNL0pDQf7vGEkD'),
     isInsightsOpen: false,
     activeZone:     'sarafa',
     lastQuery:      null,
@@ -250,9 +250,12 @@ const AI = {
    ============================================= */
 const Utils = {
   escapeHtml(s) {
-    const d = document.createElement('div');
-    d.appendChild(document.createTextNode(String(s)));
-    return d.innerHTML;
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   },
 
   formatAIResponse(text) {
@@ -675,19 +678,29 @@ function initApp() {
   initAIChat();
   initScrollReveal();
 
-  window.closeInsightsModal = closeInsightsModal;
+  if (typeof window !== 'undefined') {
+    window.closeInsightsModal = closeInsightsModal;
+  }
 
   console.info('%c🌏 CultureRoam Ready', 'color:#6c63ff;font-weight:bold;font-size:14px;');
   console.info('%cAI: Pollinations.ai (free) → Groq (if key) → Demo content', 'color:#10b981;font-size:11px;');
 
   // Ping Pollinations to warm up connection
-  fetch('https://text.pollinations.ai/hello?model=openai-large', { method:'GET' })
-    .then(() => console.info('%c✓ Pollinations.ai reachable', 'color:#10b981;'))
-    .catch(() => console.warn('Pollinations may be unreachable — demo content will be used as fallback'));
+  if (typeof fetch !== 'undefined') {
+    fetch('https://text.pollinations.ai/hello?model=openai-large', { method:'GET' })
+      .then(() => console.info('%c✓ Pollinations.ai reachable', 'color:#10b981;'))
+      .catch(() => console.warn('Pollinations may be unreachable — demo content will be used as fallback'));
+  }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+  } else {
+    initApp();
+  }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { Config, StateManager, RateLimiter, AI, Utils, PollinationsAI, GroqAI };
 }
